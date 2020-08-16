@@ -1,7 +1,7 @@
-mag-encoder.c:17:7:atan2_approx	56	static
-mag-encoder.c:50:7:sin_fast	48	static
+mag-encoder.c:17:7:atan2_approx	40	static
+mag-encoder.c:50:7:sin_fast	24	static
 mag-encoder.c:92:7:cos_fast	24	static
-mag-encoder.c:97:7:theta_abs_rad	24	static
-mag-encoder.c:106:7:theta_abs_deg	8	static
-mag-encoder.c:114:7:fmod_2pi	40	static
-mag-encoder.c:129:7:unwrap	32	static
+mag-encoder.c:97:7:theta_abs_rad	40	static
+mag-encoder.c:106:7:theta_abs_deg	40	static
+mag-encoder.c:114:7:fmod_2pi	16	static
+mag-encoder.c:129:7:unwrap	24	static

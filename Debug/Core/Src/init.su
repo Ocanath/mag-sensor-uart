@@ -1,6 +1,6 @@
-init.c:16:6:SystemClock_Config	96	static
-init.c:60:6:MX_ADC_Init	24	static
-init.c:119:6:MX_USART1_UART_Init	8	static
-init.c:152:6:MX_DMA_Init	16	static
-init.c:170:6:MX_GPIO_Init	48	static
-init.c:198:6:Error_Handler	8	static
+init.c:15:6:SystemClock_Config	96	static
+init.c:63:6:MX_ADC_Init	32	static
+init.c:122:6:MX_USART1_UART_Init	8	static
+init.c:155:6:MX_DMA_Init	16	static
+init.c:173:6:MX_GPIO_Init	48	static
+init.c:201:6:Error_Handler	0	static

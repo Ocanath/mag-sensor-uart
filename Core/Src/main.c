@@ -6,6 +6,13 @@ typedef union
 	uint8_t d[4];
 }floatsend_t;
 
+volatile uint8_t gl_adc_cplt_flag = 0;
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	gl_adc_cplt_flag = 1;
+}
+
+
 int main(void)
 {
 	HAL_Init();
@@ -17,7 +24,7 @@ int main(void)
 
 	HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
-	HAL_Delay(100);
+	HAL_Delay(1000);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15,0);
 
 	floatsend_t theta;
@@ -28,12 +35,19 @@ int main(void)
 
 	while (1)
 	{
-		theta.v = unwrap(theta_abs_rad(),&prev_theta);
+		if(gl_adc_cplt_flag)
+		{
+			theta.v = unwrap(theta_abs_rad(),&prev_theta);
+			gl_adc_cplt_flag = 0;
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 0);
+		}
 
 		if(HAL_GetTick() >= uart_disp_ts) //update frequency may be prone to jitters due to high calculation time of unwrap and atan2
 		{
+			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
 			HAL_UART_Transmit(&huart1, theta.d, 4, uart_update_period);
 			uart_disp_ts = HAL_GetTick()+uart_update_period;	//1 = 1khz, 2 = 500Hz, 3 = 333Hz
+
 		}
 	}
 }
