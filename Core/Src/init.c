@@ -28,7 +28,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL12;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL4;
   RCC_OscInitStruct.PLL.PREDIV = RCC_PREDIV_DIV1;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -42,7 +42,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -53,7 +53,6 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 }
-
 
 /**
  * @brief ADC Initialization Function
@@ -86,7 +85,7 @@ void MX_ADC_Init(void)
 	hadc.Init.DiscontinuousConvMode = DISABLE;
 	hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
 	hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-	hadc.Init.DMAContinuousRequests = ENABLE;
+	hadc.Init.DMAContinuousRequests = DISABLE;
 	hadc.Init.Overrun = ADC_OVR_DATA_OVERWRITTEN;
 	if (HAL_ADC_Init(&hadc) != HAL_OK)
 	{
@@ -96,7 +95,7 @@ void MX_ADC_Init(void)
 	 */
 	sConfig.Channel = ADC_CHANNEL_0;
 	sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-	sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+	sConfig.SamplingTime = ADC_SAMPLETIME_28CYCLES_5;
 	if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
 	{
 		Error_Handler();
