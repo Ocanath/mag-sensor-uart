@@ -3,8 +3,21 @@
 typedef union
 {
 	float v;
-	uint8_t d[4];
+	uint8_t d[sizeof(float)+1];
 }floatsend_t;
+
+/*
+Generic hex checksum calculation.
+TODO: use this in the psyonic API
+*/
+uint8_t get_checksum(uint8_t * arr, int size)
+{
+
+	int8_t checksum = 0;
+	for (int i = 0; i < size; i++)
+		checksum += (int8_t)arr[i];
+	return -checksum;
+}
 
 volatile uint8_t gl_adc_cplt_flag = 0;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
@@ -38,6 +51,7 @@ int main(void)
 		if(gl_adc_cplt_flag)
 		{
 			theta.v = unwrap(theta_abs_rad(),&prev_theta);
+			theta.d[4] = get_checksum(theta.d, 4);
 			gl_adc_cplt_flag = 0;
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 0);
 		}
@@ -46,7 +60,7 @@ int main(void)
 		{
 			HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
 			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
-			HAL_UART_Transmit(&huart1, theta.d, 4, uart_update_period);
+			HAL_UART_Transmit(&huart1, theta.d, 5, uart_update_period);
 			uart_disp_ts = HAL_GetTick()+uart_update_period;	//1 = 1khz, 2 = 500Hz, 3 = 333Hz
 
 		}
