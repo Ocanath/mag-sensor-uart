@@ -41,7 +41,7 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15,0);
 
 	floatsend_t theta;
-	float prev_theta = 0.f;
+	float prev_theta = -HALF_PI;
 
 	uint32_t uart_disp_ts = 0;
 	const uint32_t uart_update_period = 1;	//in ms
