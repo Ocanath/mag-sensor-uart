@@ -36,16 +36,19 @@ int main(void)
 	MX_USART1_UART_Init();
 
 	HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
-	HAL_Delay(1000);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15,0);
+	for(int i = 0; i < 3; i++)
+	{
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
+		HAL_Delay(50);
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 0);
+		HAL_Delay(50);
+	}
 
 	floatsend_t theta;
 	float prev_theta = -HALF_PI;
 
 	uint32_t uart_disp_ts = 0;
 	const uint32_t uart_update_period = 1;	//in ms
-
 	while (1)
 	{
 		if(gl_adc_cplt_flag)
@@ -53,13 +56,11 @@ int main(void)
 			theta.v = unwrap(theta_abs_rad(),&prev_theta);
 			theta.d[4] = get_checksum(theta.d, 4);
 			gl_adc_cplt_flag = 0;
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 0);
 		}
 
 		if(HAL_GetTick() >= uart_disp_ts) //update frequency may be prone to jitters due to high calculation time of unwrap and atan2
 		{
 			HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
 			HAL_UART_Transmit(&huart1, theta.d, 5, uart_update_period);
 			uart_disp_ts = HAL_GetTick()+uart_update_period;	//1 = 1khz, 2 = 500Hz, 3 = 333Hz
 
