@@ -1,14 +1,21 @@
 #include "mag-encoder.h"
 #include "m_uart.h"
+#include "trig_fixed.h"
+
+#define NETWORK_ID	1
+#define NUM_TX_BYTES 4
 
 typedef union
 {
-	float v;
-	uint8_t d[sizeof(float)+1];
-}floatsend_t;
+	int16_t v;
+	uint8_t d[sizeof(int16_t)];
+}int16_chk_t;
 
-
+static volatile int16_chk_t theta;
+static uint8_t uart_tx_buf[NUM_TX_BYTES] = {NETWORK_ID, 0, 0, 0};
 volatile uint8_t gl_adc_cplt_flag = 0;
+static volatile uint8_t uart_activity_flag = 0;
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	gl_adc_cplt_flag = 1;
@@ -21,7 +28,14 @@ void m_uart_rx_cplt_callback(uart_it_t * h)
 		sum += h->rx_buf[i];
 	if(sum == 0)
 	{
-
+		uint8_t id = h->rx_buf[0];
+		if(id == NETWORK_ID)
+		{
+			uart_tx_buf[1] = theta.d[0];
+			uart_tx_buf[2] = theta.d[1];
+			uart_tx_buf[3] = get_checksum(uart_tx_buf, 3);
+			uart_activity_flag = 1;
+		}
 	}
 }
 
@@ -38,33 +52,23 @@ int main(void)
 	HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
 	for(int i = 0; i < 3; i++)
 	{
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 1);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 1);
 		HAL_Delay(50);
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, 0);
+		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
 		HAL_Delay(50);
 	}
 
-	floatsend_t theta;
-	float prev_theta = -HALF_PI;
-
-	uint32_t uart_disp_ts = 0;
-	const uint32_t uart_update_period = 1;	//in ms
 	while (1)
 	{
 		if(gl_adc_cplt_flag)
 		{
-			theta.v = unwrap(theta_abs_rad(),&prev_theta);
-			theta.d[4] = get_checksum(theta.d, 4);
+			theta.v = (int16_t)(theta_abs_fixed());
 			gl_adc_cplt_flag = 0;
 		}
-
-		if(HAL_GetTick() >= uart_disp_ts) //update frequency may be prone to jitters due to high calculation time of unwrap and atan2
+		if(uart_activity_flag)
 		{
 			HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
-//			HAL_UART_Transmit(&huart1, theta.d, 5, uart_update_period);
-			m_uart_tx_start(&m_huart1, theta.d, 5);
-			uart_disp_ts = HAL_GetTick()+uart_update_period;	//1 = 1khz, 2 = 500Hz, 3 = 333Hz
-
+			uart_activity_flag = 0;
 		}
 	}
 }
