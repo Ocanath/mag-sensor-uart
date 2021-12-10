@@ -1,4 +1,5 @@
 #include "mag-encoder.h"
+#include "m_uart.h"
 
 typedef union
 {
@@ -6,23 +7,22 @@ typedef union
 	uint8_t d[sizeof(float)+1];
 }floatsend_t;
 
-/*
-Generic hex checksum calculation.
-TODO: use this in the psyonic API
-*/
-uint8_t get_checksum(uint8_t * arr, int size)
-{
-
-	int8_t checksum = 0;
-	for (int i = 0; i < size; i++)
-		checksum += (int8_t)arr[i];
-	return -checksum;
-}
 
 volatile uint8_t gl_adc_cplt_flag = 0;
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	gl_adc_cplt_flag = 1;
+}
+
+void m_uart_rx_cplt_callback(uart_it_t * h)
+{
+	int8_t sum = 0;
+	for(int i = 0; i < h->bytes_received; i++)
+		sum += h->rx_buf[i];
+	if(sum == 0)
+	{
+
+	}
 }
 
 
@@ -61,7 +61,8 @@ int main(void)
 		if(HAL_GetTick() >= uart_disp_ts) //update frequency may be prone to jitters due to high calculation time of unwrap and atan2
 		{
 			HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
-			HAL_UART_Transmit(&huart1, theta.d, 5, uart_update_period);
+//			HAL_UART_Transmit(&huart1, theta.d, 5, uart_update_period);
+			m_uart_tx_start(&m_huart1, theta.d, 5);
 			uart_disp_ts = HAL_GetTick()+uart_update_period;	//1 = 1khz, 2 = 500Hz, 3 = 333Hz
 
 		}
