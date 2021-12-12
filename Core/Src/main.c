@@ -34,6 +34,7 @@ void m_uart_rx_cplt_callback(uart_it_t * h)
 			uart_tx_buf[1] = theta.d[0];
 			uart_tx_buf[2] = theta.d[1];
 			uart_tx_buf[3] = get_checksum(uart_tx_buf, 3);
+			m_uart_tx_start(&m_huart1, uart_tx_buf, 4);
 			uart_activity_flag = 1;
 		}
 	}

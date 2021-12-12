@@ -143,7 +143,10 @@ void MX_USART1_UART_Init(void)
 		Error_Handler();
 	}
 	/* USER CODE BEGIN USART1_Init 2 */
-
+	/*My additions for baremetal handler modification: */
+	USART1->CR1 |= (1 << 5) | (1 << 7) | (1 << 2) | (1 << 3);	//enable rxneie, txeie, RE and TE
+	USART1->CR1 &= ~(1 << 7);	//disable TX interrupt
+	USART1->CR1 |= (1 << 4);	//enable IDLE interrupt
 	/* USER CODE END USART1_Init 2 */
 
 }
