@@ -58,18 +58,25 @@ int main(void)
 		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, 0);
 		HAL_Delay(50);
 	}
-
+	const uint32_t uart_update_interval = 1;
+	uint32_t uart_tx_ts = 0;
 	while (1)
 	{
+		uint32_t tick = HAL_GetTick();
+
 		if(gl_adc_cplt_flag)
 		{
 			theta.v = (int16_t)(theta_abs_fixed());
 			gl_adc_cplt_flag = 0;
 		}
-		if(uart_activity_flag)
+		if((tick - uart_tx_ts) >= uart_update_interval)
 		{
 			HAL_ADC_Start_DMA(&hadc, (uint32_t * )dma_adc_raw, NUM_ADC);
-			uart_activity_flag = 0;
+			uart_tx_buf[0] = theta.d[0];
+			uart_tx_buf[1] = theta.d[1];
+			uart_tx_buf[2] = get_checksum(uart_tx_buf, 2);
+			m_uart_tx_start(&m_huart1, uart_tx_buf, 3);
+			uart_tx_ts = tick;
 		}
 	}
 }

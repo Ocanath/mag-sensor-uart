@@ -8,6 +8,11 @@
 
 #include "init.h"
 
+ADC_HandleTypeDef hadc;
+DMA_HandleTypeDef hdma_adc;
+
+UART_HandleTypeDef huart1;
+
 /**
  * @brief System Clock Configuration
  * @retval None

@@ -10,10 +10,10 @@
 #include "main.h"
 
 
-ADC_HandleTypeDef hadc;
-DMA_HandleTypeDef hdma_adc;
+extern ADC_HandleTypeDef hadc;
+extern DMA_HandleTypeDef hdma_adc;
 
-UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart1;
 
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
