@@ -21,7 +21,7 @@
 #define TWO_PI              	6.28318530718
 #define ONE_BY_TWO_PI 			0.1591549
 
-const float rad_to_deg;
+extern const float rad_to_deg;
 
 extern float theta_m_prev;
 
